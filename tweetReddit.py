@@ -4,28 +4,31 @@ import json
 import re
 
 def tweet(i, data):
+    pub = api.home_timeline()
     post = data['data']['children'][i]['data']
 
     try:
         if len('\n'.join([post['title'], post['url']])) <= 140:
             try:
-                api.update_status('\n'.join([post['title'], post['url']]))
+                if '\n'.join([post['title'], post['url']]) not in pub:
+                    api.update_status('\n'.join([post['title'], post['url']]))
             except Exception, e:
                 print "It's too long"
-                tweet(i+1)
+                tweet(i+1, data)
             pass
         elif len('\n'.join([re.search(r'^.*?[\.!\?](?:\s|$)',post['title']).group(0),
             post['url']])) <= 140:
             try:
-                api.update_status('\n'.join([re.search(r'^.*?[\.!\?](?:\s|$)',post['title']).group(0), post['url']]))
+                if '\n'.join([re.search(r'^.*?[\.!\?](?:\s|$)',post['title']).group(0), post['url']]) not in pub:
+                    api.update_status('\n'.join([re.search(r'^.*?[\.!\?](?:\s|$)',post['title']).group(0), post['url']]))
             except Exception, e:
                 print 'Not even the first sentence.'
-                tweet(i+1)
+                tweet(i+1, data)
             pass
         else:
             print i
             print 'Could not resolve 140 rule issue.'
-            tweet(i+1)
+            tweet(i+1, data)
     except Exception, e:
         print 'Could not resolve 140 rule.'
         tweet(i+1, data)
